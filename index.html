@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فلامنجو هايبر ماركت</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #2B4257;
+  --pink: #F38198;
+  --light-bg: #f4f7f6;
+  --dark-text: #2c3e50;
+  --border: #e0e6ed;
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo', Tahoma, Arial, sans-serif;background:var(--light-bg);color:var(--dark-text); min-height: 100vh; display: flex; flex-direction: column;}
+
+/* --- Login Screen Styles --- */
+#login-screen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--navy); display: flex; justify-content: center; align-items: center;
+  z-index: 9999; padding: 15px;
+}
+.login-box {
+  background: #fff; padding: 40px 30px; border-radius: 16px; width: 100%; max-width: 400px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center;
+}
+.login-box .field { margin-bottom: 15px; text-align: right; }
+.login-box label { font-weight: 600; color: var(--navy); font-size: 14px; margin-bottom: 5px; display: block;}
+.login-box input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; transition: 0.3s; }
+.login-box input:focus { border-color: var(--pink); outline: none; box-shadow: 0 0 0 3px rgba(243,129,152,0.1); }
+.login-box button { width: 100%; padding: 14px; font-size: 16px; margin-top: 15px; border-radius: 8px; }
+.login-error { color: #e74c3c; font-size: 14px; margin-bottom: 15px; display: none; font-weight: bold; background: #fadbd8; padding: 10px; border-radius: 6px;}
+
+/* --- Main App Layout --- */
+.app{display:none; min-height:100vh; flex: 1;}
+.side{width:240px;background:var(--navy);color:#fff;padding:20px 15px;position:fixed;right:0;top:0;bottom:0;z-index:100;overflow-y:auto; box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between;}
+.logo{text-align:center;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:15px;}
+.user-info { text-align: center; font-size: 14px; color: #f8f9fa; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+.nav button{width:100%;border:0;background:transparent;color:#ecf0f1;text-align:right;padding:12px 15px;border-radius:8px;margin:4px 0;font-size:15px;cursor:pointer;transition:0.2s;white-space:nowrap; font-family: inherit; font-weight: 600;}
+.nav button:hover, .nav button.active{background:rgba(255,255,255,0.1);color: var(--pink);}
+.manager-only { display: none; }
+
+.main{margin-right:240px;width:calc(100% - 240px);padding:25px;transition:all 0.3s; padding-bottom: 40px;}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.top h1{margin:0;font-size:24px; color: var(--navy); font-weight: 700;}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+button{cursor:pointer;border:0;border-radius:8px;padding:10px 16px;font-weight:bold;font-size:14px;transition:0.2s; font-family: inherit;}
+button:hover{opacity:0.9; transform: translateY(-1px);}
+button:active{transform: translateY(0);}
+.primary{background:var(--navy);color:#fff;box-shadow: 0 4px 6px rgba(43,66,87,0.2);}
+.success{background:var(--pink);color:#fff;box-shadow: 0 4px 6px rgba(243,129,152,0.3);}
+.danger{background:#e74c3c;color:#fff;box-shadow: 0 4px 6px rgba(231,76,60,0.2);}
+.warning{background:#f39c12;color:#fff;box-shadow: 0 4px 6px rgba(243,156,18,0.2);}
+.muted{background:#e8edf2;color:var(--dark-text);}
+.export-btn{background:#16a085;color:#fff;font-size:15px;padding:12px 20px;display:inline-flex;align-items:center;gap:8px;}
+
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}
+.card{background:#fff;border:none;border-radius:12px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,0.04);margin-bottom:20px;overflow-x:auto}
+.card h3{margin:0 0 15px;font-size:18px;color:var(--navy);border-bottom:2px solid var(--light-bg);padding-bottom:10px; font-weight: 700;}
+
+.form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.field label{display:block;font-size:13px;color:#7f8c8d;margin-bottom:6px;font-weight:600}
+.field input, .field select, .field textarea{width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px; transition: 0.3s;}
+.field input:focus, .field textarea:focus{outline:none;border-color:var(--pink); background: #fffafb;}
+.field textarea{min-height:70px;resize:vertical}
+.full{grid-column:1/-1}
+
+.items{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;}
+.items th, .items td{border-bottom:1px solid var(--border);padding:12px 10px;text-align:center;font-size:14px}
+.items th{background:#f8f9fa;color:var(--navy);font-weight: 700; border-top: 1px solid var(--border); border-bottom: 2px solid var(--border);}
+.items th:first-child{border-top-right-radius: 8px;}
+.items th:last-child{border-top-left-radius: 8px;}
+.qty{font-size:16px;font-weight:bold;color:var(--navy)}
+
+.addrow{display:grid;grid-template-columns:1.5fr 70px 90px 1.5fr 85px;gap:8px;margin-top:15px; align-items: end;}
+.addrow input{min-width:0;padding:10px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px}
+.addrow button{padding: 10px;}
+
+.search{width:100%;padding:12px;border:2px solid var(--border);border-radius:8px;font-size:15px;margin-bottom:20px; font-family: inherit;}
+.search:focus { outline:none; border-color: var(--pink); }
+
+/* --- Side Watermark (Inside Sidebar Flow) --- */
+.side-watermark {
+  margin-top: 20px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);
+  color: #a0aec0; text-align: center; font-size: 11px; font-weight: 600;
+}
+.side-watermark span { color: var(--pink); font-weight: bold; }
+
+/* --- 80mm Receipt Strict Styles --- */
+.receipt-container {
+    background: #fdfdfd; display: flex; justify-content: center;
+}
+.receipt{
+  background:#fff;border:1px solid #ccc;padding:10px 5px;width:100%;max-width:302px;
+  font-family:Tahoma,Arial,sans-serif;box-shadow:0 0 10px rgba(0,0,0,0.05);color:#000;
+  margin: 0 auto;
+}
+.rid{text-align:center;font-size:24px;font-weight:bold;margin:6px 0;color:#000}
+.sep{border-top:1px dashed #000;margin:8px 0}
+.rtable{width:100%;border-collapse:collapse;margin:6px 0;table-layout:fixed}
+.rtable th, .rtable td{
+  border:1px solid #333;padding:4px 2px;font-size:12px;text-align:center;word-break:break-word;
+}
+.rtable th{background:#f0f0f0;font-weight:bold; font-size: 11px;}
+.rtable td.col-name{text-align:right;padding-right:4px; font-weight:bold;}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px;margin-bottom:25px}
+.stat{background:#fff;border:none;border-radius:12px;padding:20px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.04); position: relative; overflow: hidden;}
+.stat::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--pink); }
+.stat:nth-child(2)::after { background: var(--navy); }
+.stat:nth-child(3)::after { background: #27ae60; }
+.stat span{color:#7f8c8d;font-size:14px;font-weight:600}
+.stat b{display:block;font-size:30px;margin-top:10px;color:var(--dark-text)}
+
+.datatable{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+.datatable th, .datatable td{border-bottom:1px solid var(--border);padding:12px;text-align:center;font-size:14px}
+.datatable th{background:#f8f9fa;color:var(--navy);font-weight:bold}
+.datatable tr:hover{background:#fafdff}
+
+.tab-content{display:none;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(43,66,87,0.8); z-index: 1000; justify-content: center; align-items: center; padding:15px; backdrop-filter: blur(3px);
+}
+.modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+
+/* --- Mobile Responsiveness --- */
+@media(max-width: 850px){
+  .app { flex-direction: column; }
+  .side {
+    position: sticky; top: 0; right: 0; left: 0; width: 100%; height: auto;
+    padding: 10px 15px; display: flex; flex-direction: column; gap: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .logo { display: none; }
+  .user-info { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; margin-bottom: 8px; font-size: 13px; border-color: rgba(255,255,255,0.15); }
+  .nav {
+    display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav button {
+    width: auto; padding: 8px 14px; margin: 0; font-size: 13px; background: rgba(255,255,255,0.08); border-radius: 8px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05);
+  }
+  .nav button.active { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .manager-only, #btn-tab-users { margin-top: 0 !important; border-top: 0 !important; }
+  
+  .main { margin-right: 0; width: 100%; padding: 15px; margin-bottom: 40px; }
+  .top h1 { font-size: 20px; }
+  .grid { grid-template-columns: 1fr; gap: 15px; }
+  .form { grid-template-columns: 1fr 1fr; }
+  .addrow { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .addrow button { grid-column: 1 / -1; margin-top: 5px; }
+  .stats { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* --- PRINT MEDIA QUERIES --- */
+@page { margin: 0; }
+@media print{
+  html, body {
+    width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important;
+    background: #fff !important; font-family: Tahoma, Arial, sans-serif !important; direction: rtl !important; display: block !important;
+  }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #login-screen, .modal-overlay, .side, .top, .no-print, .nav, .actions, .card.formcard, .side-watermark { display: none !important; }
+  .app { display: block; min-height: 0; width: 100% !important;}
+  .main { margin: 0 !important; padding: 0 !important; width: 100% !important; display: block !important;}
+  .grid { display: block; gap: 0; width: 100% !important;}
+  #tab-new, #tab-fresh { display: block !important; width: 100% !important;}
+  .card:not(.formcard) { border: none !important; box-shadow: none !important; padding: 0 !important; margin-bottom: 0 !important; width: 100% !important;}
+  .receipt-container { display: block !important; width: 100% !important; background: #fff !important; padding: 0 !important; margin: 0 !important; }
+  .receipt {
+    display: block !important; border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important;
+    box-sizing: border-box !important; margin: 0 !important; padding: 0 4mm !important; min-height: 0 !important; font-size: 12px !important; line-height: 1.3 !important; overflow: hidden !important; page-break-after: auto;
+  }
+  .receipt div, .receipt table, .receipt tr { page-break-inside: avoid !important; }
+  .rtable { width: 100% !important; table-layout: fixed !important; }
+  .rtable th, .rtable td { border: 1px solid #444 !important; padding: 3px 1px !important; font-size: 11px !important; word-wrap: break-word !important; }
+  .rtable th:nth-child(1), .rtable td:nth-child(1) { width: 45%; }
+  .rtable th:nth-child(2), .rtable td:nth-child(2) { width: 15%; }
+  .rtable th:nth-child(3), .rtable td:nth-child(3) { width: 20%; }
+  .rtable th:nth-child(4), .rtable td:nth-child(4) { width: 20%; }
+  .rid { font-size: 20px !important; margin: 4px 0 !important; }
+  .sep { border-top: 1px dashed #666 !important; margin: 6px 0 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <div class="login-box">
+    <div style="text-align:center; margin-bottom:15px;">
+      <h1 style="margin:0; color:var(--navy); font-size:28px; font-weight:800; letter-spacing: -1px;">فلامنجو</h1>
+      <div style="font-size:12px; color:var(--pink); font-weight:bold; letter-spacing:1px; margin-top:4px;">HYPER MARKET</div>
+    </div>
+    
+    <div style="font-size:11px; color:#a0aec0; margin-bottom:15px; font-weight:bold;">تم التطوير بواسطة: <span>OE Vision</span></div>
+
+    <div id="loginError" class="login-error">الكود أو كلمة المرور غير صحيحة!</div>
+    <form onsubmit="event.preventDefault(); attemptLogin();">
+        <div class="field">
+          <label>كود المستخدم</label>
+          <input type="text" id="loginCode" placeholder="أدخل الكود الخاص بك" required autocomplete="off">
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+        </div>
+        <button type="submit" class="success" style="font-size: 18px;">تسجيل الدخول</button>
+    </form>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="pwdModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color:var(--navy); font-weight: 700;">تغيير كلمة المرور</h3>
+    <div class="field" style="text-align:right">
+      <label>كلمة المرور الجديدة</label>
+      <input type="password" id="newPwd" placeholder="اكتب الباسورد الجديد">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:20px">
+      <button class="success" style="flex:1" onclick="saveNewPassword()">حفظ التغيير</button>
+      <button class="danger" style="flex:1" onclick="document.getElementById('pwdModal').style.display='none'">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Application -->
+<div class="app" id="main-app">
+  <aside class="side no-print">
+    <div>
+      <div class="logo">
+        <h2 style="margin:0; color:#fff; font-size:24px; font-weight:800;">فلامنجو</h2>
+        <div style="font-size:11px; color:var(--pink); font-weight:bold; letter-spacing:1px; margin-top:4px;">HYPER MARKET</div>
+      </div>
+      <div class="user-info">
+        <div>مرحباً، <b id="displayUserName" style="color: var(--pink);"></b></div>
+        <div id="displayUserRole" style="font-size:11px; margin-top: 4px;"></div>
+      </div>
+      
+      <div class="nav">
+        <button id="btn-tab-new" class="active" onclick="switchTab('tab-new')"><span>＋ أوردر جديد</span></button>
+        <button id="btn-tab-fresh" onclick="switchTab('tab-fresh')"><span>🥩 قسم الفريشات</span></button>
+        <button id="btn-tab-suspended" onclick="switchTab('tab-suspended')"><span>⏳ أوردرات مؤجلة</span></button>
+        <button id="btn-tab-search" onclick="switchTab('tab-search')"><span>⌕ البحث والأرشيف</span></button>
+        <button id="btn-tab-cancel" onclick="switchTab('tab-cancel')"><span>❌ إلغاء الأوردرات</span></button>
+        <button id="btn-tab-reports" onclick="switchTab('tab-reports')"><span>📊 التقارير والإكسيل</span></button>
+        <button id="btn-tab-users" class="manager-only" onclick="switchTab('tab-users')"><span>👨‍💼 إدارة الموظفين</span></button>
+        <button style="color:var(--pink)" onclick="document.getElementById('pwdModal').style.display='flex'"><span>🔑 تغيير الباسورد</span></button>
+        <button style="color:#e74c3c" onclick="logout()"><span>🚪 تسجيل خروج</span></button>
+      </div>
+    </div>
+    <!-- Sidebar Watermark (Only place inside app) -->
+    <div class="side-watermark">
+      تم التطوير بواسطة: <span>OE Vision</span>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- 1. شاشة أوردر جديد -->
+    <div id="tab-new" class="tab-content" style="display:block">
+      <div class="top no-print">
+        <h1>إنشاء أوردر جديد</h1>
+        <div class="actions">
+          <button class="warning" onclick="suspendOrder()">⏳ تعليق</button>
+          <button class="primary" onclick="saveOrderAction()">💾 حفظ فقط</button>
+          <button class="success" onclick="saveAndPrintAction()">🖨️ حفظ وطباعة</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <section class="card formcard no-print">
+          <h3>بيانات الأوردر والعميل</h3>
+          <div class="form">
+            <input type="hidden" id="orderId">
+            <input type="hidden" id="windowNum">
+            <input type="hidden" id="orderDate">
+            
+            <div class="field"><label>اسم العميل</label><input id="customer" placeholder="اسم العميل" autofocus></div>
+            <div class="field"><label>رقم الموبايل</label><input id="phone" inputmode="tel" placeholder="01X..."></div>
+            <div class="field"><label>المنطقة</label><input id="area" placeholder="المنطقة"></div>
+            <div class="field full"><label>العنوان بالتفصيل</label><input id="address" placeholder="العنوان ورقم العمارة والشقة"></div>
+            <div class="field full"><label>ملاحظات الأوردر العامة</label><textarea id="notes" placeholder="أي ملاحظات عامة للطيار أو التجهيز..."></textarea></div>
+          </div>
+
+          <h3 style="margin-top:25px">إضافة صنف للأوردر</h3>
+          <div class="addrow">
+            <div>
+              <input id="productName" type="text" placeholder="اكتب اسم المنتج يدوي">
+            </div>
+            <input id="qty" type="number" min="1" value="1" placeholder="الكمية">
+            <input id="weight" type="number" min="0" placeholder="الوزن (جرام)">
+            <input id="itemNote" type="text" placeholder="ملاحظات الصنف">
+            <button class="primary" onclick="addItem()">إضافة ＋</button>
+          </div>
+          
+          <table class="items">
+            <thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>الوزن</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+          <div style="display:flex;justify-content:space-between;margin-top:20px;font-size:15px;background:#f8f9fa;padding:15px;border-radius:8px;font-weight:bold;flex-wrap:wrap;gap:10px; border: 1px solid var(--border);">
+            <span>عدد الأصناف: <span id="itemCount" style="color:var(--navy); font-size:18px;">0</span></span>
+            <span>إجمالي الكمية: <span id="totalQty" style="color:var(--navy); font-size:18px;">0</span></span>
+          </div>
+        </section>
+
+        <section class="card receipt-container">
+          <div style="width:100%;">
+              <h3 class="no-print" style="text-align:center;">معاينة الفاتورة (80mm)</h3>
+              <div class="receipt" id="receipt"></div>
+              <div class="no-print" style="display:flex;gap:8px;margin-top:15px; max-width:302px; margin-left:auto; margin-right:auto;">
+                 <button class="success" style="flex:1; padding: 12px; font-size: 16px;" onclick="saveAndPrintAction()">طباعة الفاتورة 🖨️</button>
+              </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 2. شاشة قسم الفريشات -->
+    <div id="tab-fresh" class="tab-content no-print">
+      <div class="top">
+        <h1>قسم الفريشات وتجهيز الأقسام (تكت الشيف)</h1>
+        <div class="actions">
+          <button class="success" onclick="printFreshTicket()">🖨️ طباعة تكت الفريشات</button>
+        </div>
+      </div>
+      <div class="grid">
+        <section class="card formcard">
+          <h3>بيانات أوردر الفريشات</h3>
+          <div class="form">
+            <div class="field"><label>رقم الشباك (يدوي)</label><input id="freshWindow" type="number" min="1" value="1" placeholder="رقم الشباك"></div>
+            <div class="field"><label>اسم العميل</label><input id="freshCustomer" placeholder="اسم العميل"></div>
+            <div class="field"><label>القسم / الشيف</label><input id="freshSection" placeholder="مثال: شيف الجبن / اللحوم"></div>
+          </div>
+
+          <h3 style="margin-top:25px">إضافة منتجات فريش</h3>
+          <div class="addrow">
+            <div>
+              <input id="freshProductName" type="text" placeholder="اكتب اسم المنتج يدوي">
+            </div>
+            <input id="freshQty" type="number" min="1" value="1" placeholder="الكمية">
+            <input id="freshWeight" type="number" min="0" placeholder="الوزن (جرام)">
+            <input id="freshItemNote" type="text" placeholder="ملاحظات للقسم">
+            <button class="primary" onclick="addFreshItem()">إضافة ＋</button>
+          </div>
+
+          <table class="items">
+            <thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>الوزن</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
+            <tbody id="freshItemsBody"></tbody>
+          </table>
+        </section>
+
+        <section class="card receipt-container">
+          <div style="width:100%;">
+              <h3 style="text-align:center;">معاينة تكت الفريشات (80mm)</h3>
+              <div class="receipt" id="freshReceipt"></div>
+              <div style="display:flex;gap:8px;margin-top:15px; max-width:302px; margin-left:auto; margin-right:auto;">
+                 <button class="success" style="flex:1; padding: 12px; font-size: 16px;" onclick="printFreshTicket()">طباعة التكت 🖨️</button>
+              </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- باقي التبويبات -->
+    <div id="tab-suspended" class="tab-content no-print">
+      <div class="top"><h1>الأوردرات المعلقة</h1></div>
+      <div class="card">
+        <table class="datatable">
+          <thead><tr><th>التاريخ</th><th>العميل</th><th>الشباك</th><th>الأصناف</th><th>إجراء</th></tr></thead>
+          <tbody id="suspendedBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-search" class="tab-content no-print">
+      <div class="top"><h1>البحث والأرشيف</h1></div>
+      <div class="card">
+        <input id="historySearch" class="search" placeholder="ابحث برقم الأوردر، العميل، الكاشير..." oninput="renderHistory()">
+        <table class="datatable">
+          <thead><tr><th>رقم الأوردر</th><th>الوقت</th><th>الشباك</th><th>العميل</th><th>الموبايل</th><th>الأصناف</th><th>الكاشير</th><th>إجراء</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-cancel" class="tab-content no-print">
+      <div class="top"><h1>إلغاء الأوردرات</h1></div>
+      <div class="card">
+        <input id="cancelSearch" class="search" placeholder="ابحث للإلغاء..." oninput="renderCancelList()">
+        <table class="datatable">
+          <thead><tr><th>رقم الأوردر</th><th>الوقت</th><th>الشباك</th><th>العميل</th><th>الموبايل</th><th>حذف</th></tr></thead>
+          <tbody id="cancelBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-reports" class="tab-content no-print">
+      <div class="top"><h1>التقارير والإكسيل</h1><button class="export-btn" onclick="exportToExcel()">📥 تصدير Excel</button></div>
+      <div class="card no-print" style="margin-bottom: 20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; background:#f8f9fa;">
+        <b>من:</b> <input type="date" id="dateFrom" style="padding:8px; border:2px solid #e0e6ed; border-radius:8px;">
+        <b>إلى:</b> <input type="date" id="dateTo" style="padding:8px; border:2px solid #e0e6ed; border-radius:8px;">
+        <button class="primary" onclick="filterReports()">تنفيذ</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>عدد الأوردرات</span><b id="sOrders">0</b></div>
+        <div class="stat"><span>الكميات الكلية</span><b id="sQty">0</b></div>
+        <div class="stat"><span>الحالة</span><b style="color:var(--pink); font-size:20px;">نشط</b></div>
+      </div>
+    </div>
+
+    <div id="tab-users" class="tab-content no-print manager-only">
+      <div class="top"><h1>إدارة الموظفين</h1></div>
+      <div class="card">
+        <h3>إضافة كاشير جديد</h3>
+        <div class="form">
+          <div class="field"><label>اسم الموظف</label><input id="newUserName"></div>
+          <div class="field"><label>كود الدخول</label><input id="newUserCode"></div>
+          <div class="field"><label>الباسورد</label><input type="password" id="newUserPwd"></div>
+        </div>
+        <button class="success" style="margin-top:15px;" onclick="createNewUser()">إنشاء حساب ➕</button>
+      </div>
+      <div class="card">
+        <h3>الموظفين المسجلين</h3>
+        <table class="datatable">
+          <thead><tr><th>الاسم</th><th>الكود</th><th>الدور</th><th>إجراء</th></tr></thead>
+          <tbody id="usersListBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function toEnglishNumbers(str) {
+  const arabicNumbers = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  let res = String(str ?? '');
+  for(let i=0; i<10; i++) res = res.replace(new RegExp(arabicNumbers[i], 'g'), i);
+  return res;
+}
+
+let users = JSON.parse(localStorage.getItem("oms_users_v32")) || [
+  { code: 'admin', password: 'admin', name: 'مدير النظام (Team Manager)', role: 'manager' },
+  { code: '1', password: '123456789', name: 'عمر الزناتي', role: 'cashier' }
+];
+let currentUser = null;
+
+let orders = JSON.parse(localStorage.getItem("oms_orders_v32") || "[]");
+let suspendedOrders = JSON.parse(localStorage.getItem("oms_suspended_v32") || "[]");
+let currentItems = [];
+let freshItems = [];
+let editingSuspendedId = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+    let savedUserJson = sessionStorage.getItem("oms_current_user_v32");
+    if (savedUserJson) {
+        currentUser = JSON.parse(savedUserJson);
+        document.getElementById("login-screen").style.display = 'none';
+        document.getElementById("main-app").style.display = 'flex';
+        document.getElementById("displayUserName").textContent = currentUser.name;
+        document.getElementById("displayUserRole").textContent = currentUser.role === 'manager' ? "(مدير النظام)" : "(كاشير)";
+        
+        let managerElements = document.querySelectorAll(".manager-only");
+        managerElements.forEach(el => el.style.display = (currentUser.role === 'manager') ? 'block' : 'none');
+        
+        initNewOrderFields();
+        renderFreshReceipt();
+        switchTab('tab-new');
+    }
+});
+
+function attemptLogin() {
+  let code = toEnglishNumbers(document.getElementById("loginCode").value.trim());
+  let pwd = toEnglishNumbers(document.getElementById("loginPassword").value.trim());
+  let errorMsg = document.getElementById("loginError");
+  
+  let user = users.find(u => u.code === code && u.password === pwd);
+  if(user) {
+    currentUser = user;
+    sessionStorage.setItem("oms_current_user_v32", JSON.stringify(user));
+    
+    errorMsg.style.display = 'none';
+    document.getElementById("login-screen").style.display = 'none';
+    document.getElementById("main-app").style.display = 'flex';
+    document.getElementById("displayUserName").textContent = user.name;
+    document.getElementById("displayUserRole").textContent = currentUser.role === 'manager' ? "(مدير النظام)" : "(كاشير)";
+    
+    let managerElements = document.querySelectorAll(".manager-only");
+    managerElements.forEach(el => el.style.display = (user.role === 'manager') ? 'block' : 'none');
+    
+    document.getElementById("loginCode").value = '';
+    document.getElementById("loginPassword").value = '';
+    
+    initNewOrderFields();
+    renderFreshReceipt();
+    switchTab('tab-new');
+  } else {
+    errorMsg.style.display = 'block';
+  }
+}
+
+function logout() {
+  currentUser = null;
+  sessionStorage.removeItem("oms_current_user_v32");
+  document.getElementById("main-app").style.display = 'none';
+  document.getElementById("login-screen").style.display = 'flex';
+}
+
+function saveNewPassword() {
+  let newP = document.getElementById("newPwd").value.trim();
+  if(!newP) { alert("برجاء كتابة باسورد جديد"); return; }
+  let uIndex = users.findIndex(u => u.code === currentUser.code);
+  if(uIndex > -1) {
+    users[uIndex].password = newP;
+    localStorage.setItem("oms_users_v32", JSON.stringify(users));
+    alert("تم تغيير كلمة المرور بنجاح!");
+    document.getElementById('pwdModal').style.display = 'none';
+    document.getElementById("newPwd").value = '';
+  }
+}
+
+function createNewUser() {
+  if (currentUser.role !== 'manager') return;
+  let n = document.getElementById("newUserName").value.trim();
+  let c = document.getElementById("newUserCode").value.trim();
+  let p = document.getElementById("newUserPwd").value.trim();
+  if(!n || !c || !p) { alert("أكمل جميع البيانات"); return; }
+  if(users.find(u => u.code === c)) { alert("هذا الكود مستخدم بالفعل!"); return; }
+  users.push({ name: n, code: c, password: p, role: 'cashier' });
+  localStorage.setItem("oms_users_v32", JSON.stringify(users));
+  document.getElementById("newUserName").value = "";
+  document.getElementById("newUserCode").value = "";
+  document.getElementById("newUserPwd").value = "";
+  alert("تم إضافة الموظف بنجاح!");
+  renderUsersList();
+}
+
+function renderUsersList() {
+  let b = document.getElementById("usersListBody");
+  b.innerHTML = users.map((u, i) => `
+    <tr>
+      <td>${esc(u.name)}</td>
+      <td><b>${esc(u.code)}</b></td>
+      <td>${u.role === 'manager' ? '<span style="color:var(--pink); font-weight:bold;">مدير</span>' : 'كاشير'}</td>
+      <td>${u.code !== 'admin' ? `<button class="danger" style="padding:6px 12px" onclick="deleteUser(${i})">حذف</button>` : '-'}</td>
+    </tr>
+  `).join("");
+}
+
+function deleteUser(index) {
+  if (users[index].code === 'admin') return;
+  if(confirm("حذف هذا الموظف؟")) {
+    users.splice(index, 1);
+    localStorage.setItem("oms_users_v32", JSON.stringify(users));
+    renderUsersList();
+  }
+}
+
+function saveData() {
+  localStorage.setItem("oms_orders_v32", JSON.stringify(orders));
+  localStorage.setItem("oms_suspended_v32", JSON.stringify(suspendedOrders));
+}
+
+function getNextId() {
+  if (!currentUser) return 100;
+  let key = "oms_seq_v32_" + currentUser.code;
+  let seq = localStorage.getItem(key);
+  if (!seq) {
+    seq = "99";
+    localStorage.setItem(key, seq);
+  }
+  return parseInt(seq) + 1;
+}
+
+function incrementId() {
+  if (!currentUser) return 100;
+  let key = "oms_seq_v32_" + currentUser.code;
+  let current = getNextId();
+  localStorage.setItem(key, current);
+  return current;
+}
+
+function now() {
+  let d = new Date();
+  return d.toLocaleDateString("en-GB") + " - " + d.toLocaleTimeString("ar-EG", {hour:"2-digit",minute:"2-digit"});
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav button').forEach(el => el.classList.remove('active'));
+  let targetTab = document.getElementById(tabId);
+  if(targetTab) targetTab.style.display = 'block';
+  let activeBtn = document.getElementById('btn-' + tabId);
+  if(activeBtn) activeBtn.classList.add('active');
+  
+  if(tabId === 'tab-fresh') renderFreshReceipt();
+  if(tabId === 'tab-suspended') renderSuspended();
+  if(tabId === 'tab-search') renderHistory();
+  if(tabId === 'tab-cancel') renderCancelList();
+  if(tabId === 'tab-reports') updateStats();
+  if(tabId === 'tab-users') renderUsersList();
+}
+
+function initNewOrderFields() {
+    let nextNum = getNextId();
+    document.getElementById("orderId").value = nextNum;
+    let windowCalc = ((nextNum - 100) % 10) + 1; 
+    document.getElementById("windowNum").value = windowCalc;
+    document.getElementById("orderDate").value = now();
+    renderReceipt();
+}
+
+function clearOrder() {
+  editingSuspendedId = null;
+  initNewOrderFields();
+  ["customer", "phone", "area", "address", "notes", "productName", "weight", "itemNote"].forEach(x => {
+      let el = document.getElementById(x);
+      if(el) el.value = "";
+  });
+  document.getElementById("qty").value = 1;
+  currentItems = [];
+  renderItems();
+  renderReceipt();
+  let cust = document.getElementById("customer");
+  if(cust) cust.focus();
+}
+
+function addItem() {
+  let name = document.getElementById("productName").value.trim();
+  let q = Math.max(1, parseInt(document.getElementById("qty").value) || 1);
+  let w = parseFloat(document.getElementById("weight").value) || 0;
+  let note = document.getElementById("itemNote").value.trim();
+  
+  if(!name) { alert("اكتب اسم المنتج يدوي!"); document.getElementById("productName").focus(); return; }
+  
+  currentItems.push({ product: name, qty: q, weight: w, note: note });
+  
+  document.getElementById("productName").value = "";
+  document.getElementById("qty").value = 1;
+  document.getElementById("weight").value = "";
+  document.getElementById("itemNote").value = "";
+  document.getElementById("productName").focus();
+  renderItems(); renderReceipt();
+}
+
+function removeItem(i) { currentItems.splice(i, 1); renderItems(); renderReceipt(); }
+
+function renderItems() {
+  let b = document.getElementById("itemsBody");
+  b.innerHTML = currentItems.map((x, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td style="font-weight:700; color:var(--navy);">${esc(x.product)}</td>
+      <td class="qty">${x.qty}</td>
+      <td style="color:#7f8c8d">${x.weight ? x.weight + 'g' : '-'}</td>
+      <td style="font-size:12px; color:#7f8c8d;">${esc(x.note || "-")}</td>
+      <td><button class="danger" style="padding:6px 10px; font-size:12px;" onclick="removeItem(${i})">حذف</button></td>
+    </tr>
+  `).join("");
+  
+  document.getElementById("itemCount").textContent = currentItems.length;
+  document.getElementById("totalQty").textContent = currentItems.reduce((a, x) => a + x.qty, 0);
+}
+
+function renderReceipt() {
+  let id = document.getElementById("orderId").value || getNextId();
+  let wNum = document.getElementById("windowNum").value || 1;
+  let customer = document.getElementById("customer").value || "—";
+  let phone = document.getElementById("phone").value || "—";
+  let area = document.getElementById("area").value || "—";
+  let address = document.getElementById("address").value || "";
+  let notes = document.getElementById("notes").value || "";
+  let dt = document.getElementById("orderDate").value || now();
+  
+  let rows = currentItems.map((x) => `
+    <tr>
+      <td class="col-name"><b>${esc(x.product)}</b>${x.note ? `<div style="font-size:9px;color:#333">${esc(x.note)}</div>` : ""}</td>
+      <td>${x.qty}</td>
+      <td>${x.weight ? x.weight + 'g' : '-'}</td>
+      <td>${esc(x.note || '-')}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("receipt").innerHTML = `
+    <div style="text-align:center; margin-bottom:12px;">
+      <h2 style="margin:0; font-size:28px; font-weight:900; color:#000; letter-spacing:-1px;">فلامنجو</h2>
+      <div style="font-size:11px; font-weight:bold; letter-spacing:1px; color:#333; border-top:1px solid #000; display:inline-block; padding-top:4px; margin-top:2px;">HYPER MARKET</div>
+    </div>
+    
+    <div class="rid">شباك #${esc(wNum)}</div>
+    <div style="text-align:center;font-size:14px;margin-bottom:3px;font-weight:bold;">أوردر رقم: #${esc(id)}</div>
+    <div style="text-align:center;font-size:12px;margin-bottom:6px; font-weight: bold;">التاريخ: ${esc(dt)}</div>
+    <div class="sep"></div>
+    <div style="border:1px solid #000;padding:6px;line-height:1.6;font-size:13px; font-weight:bold;">
+      الاسم: ${esc(customer)}<br>
+      الموبايل: ${esc(phone)}<br>
+      المنطقة: ${esc(area)}
+      ${address ? `<br>العنوان: ${esc(address)}` : ""}
+    </div>
+    <div class="sep"></div>
+    <table class="rtable">
+      <thead>
+        <tr>
+          <th style="width:45%">الصنف</th>
+          <th style="width:15%">كمية</th>
+          <th style="width:20%">وزن</th>
+          <th style="width:20%">ملاحظات</th>
+        </tr>
+      </thead>
+      <tbody>${rows || '<tr><td colspan="4" style="text-align:center">لم تتم إضافة أصناف</td></tr>'}</tbody>
+    </table>
+    ${notes ? `<div style="margin-top:8px;border:1px dashed #000;padding:6px;font-size:12px;"><b>ملاحظات:</b> ${esc(notes)}</div>` : ''}
+    <div class="rmeta">
+      <span>الكاشير: ${esc(currentUser ? currentUser.name : 'Admin')}</span>
+      <span>الوقت: ${esc(new Date().toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}))}</span>
+    </div>
+  `;
+}
+
+/* --- Fresh Section Logic --- */
+function addFreshItem() {
+  let name = document.getElementById("freshProductName").value.trim();
+  let q = Math.max(1, parseInt(document.getElementById("freshQty").value) || 1);
+  let w = parseFloat(document.getElementById("freshWeight").value) || 0;
+  let note = document.getElementById("freshItemNote").value.trim();
+  
+  if(!name) { alert("اكتب اسم المنتج يدوي!"); document.getElementById("freshProductName").focus(); return; }
+  
+  freshItems.push({ product: name, qty: q, weight: w, note: note });
+  
+  document.getElementById("freshProductName").value = "";
+  document.getElementById("freshQty").value = 1;
+  document.getElementById("freshWeight").value = "";
+  document.getElementById("freshItemNote").value = "";
+  document.getElementById("freshProductName").focus();
+  renderFreshItems(); renderFreshReceipt();
+}
+
+function removeFreshItem(i) { freshItems.splice(i, 1); renderFreshItems(); renderFreshReceipt(); }
+
+function renderFreshItems() {
+  let b = document.getElementById("freshItemsBody");
+  b.innerHTML = freshItems.map((x, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td style="font-weight:700; color:var(--navy);">${esc(x.product)}</td>
+      <td class="qty">${x.qty}</td>
+      <td style="color:#7f8c8d">${x.weight ? x.weight + 'g' : '-'}</td>
+      <td style="font-size:12px; color:#7f8c8d;">${esc(x.note || "-")}</td>
+      <td><button class="danger" style="padding:6px 10px; font-size:12px;" onclick="removeFreshItem(${i})">حذف</button></td>
+    </tr>
+  `).join("");
+}
+
+function renderFreshReceipt() {
+  let wNum = document.getElementById("freshWindow").value || 1;
+  let customer = document.getElementById("freshCustomer").value || "—";
+  let section = document.getElementById("freshSection").value || "قسم الفريشات";
+  
+  let rows = freshItems.map((x) => `
+    <tr>
+      <td class="col-name"><b>${esc(x.product)}</b>${x.note ? `<div style="font-size:9px;color:#333">${esc(x.note)}</div>` : ""}</td>
+      <td>${x.qty}</td>
+      <td>${x.weight ? x.weight + 'g' : '-'}</td>
+      <td>${esc(x.note || '-')}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("freshReceipt").innerHTML = `
+    <div style="text-align:center; margin-bottom:10px;">
+      <h2 style="margin:0; font-size:22px; font-weight:900; color:#000;">${esc(section)}</h2>
+      <div style="font-size:11px; font-weight:bold; color:#333;">فلامنجو هايبر ماركت</div>
+    </div>
+    
+    <div class="rid" style="font-size:20px; margin:4px 0;">شباك #${esc(wNum)}</div>
+    <div class="sep"></div>
+    <div style="font-size:13px; font-weight:bold; margin-bottom:6px;">
+      اسم العميل: ${esc(customer)}
+    </div>
+    <div class="sep"></div>
+    <table class="rtable">
+      <thead>
+        <tr>
+          <th style="width:45%">الصنف</th>
+          <th style="width:15%">كمية</th>
+          <th style="width:20%">وزن</th>
+          <th style="width:20%">ملاحظات</th>
+        </tr>
+      </thead>
+      <tbody>${rows || '<tr><td colspan="4" style="text-align:center">لم تتم إضافة أصناف فريش</td></tr>'}</tbody>
+    </table>
+  `;
+}
+
+function printFreshTicket() {
+  if(freshItems.length === 0) { alert("أضف منتجات فريش أولاً للطباعة!"); return; }
+  renderFreshReceipt();
+  setTimeout(() => {
+      window.print();
+  }, 300);
+}
+
+function collectData() {
+  return {
+    id: document.getElementById("orderId").value,
+    windowNum: document.getElementById("windowNum").value,
+    customer: document.getElementById("customer").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    area: document.getElementById("area").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    notes: document.getElementById("notes").value.trim(),
+    date: document.getElementById("orderDate").value,
+    isoDate: new Date().toISOString(),
+    items: JSON.parse(JSON.stringify(currentItems)),
+    cashierCode: currentUser.code,
+    cashierName: currentUser.name
+  };
+}
+
+function performSave() {
+  if(!document.getElementById("customer").value.trim() && !document.getElementById("phone").value.trim() && currentItems.length === 0) { 
+      alert("أدخل بيانات العميل أو الأصناف أولاً!"); 
+      return false; 
+  }
+
+  incrementId();
+  let o = collectData();
+  if(editingSuspendedId) {
+    suspendedOrders = suspendedOrders.filter(x => x.id !== editingSuspendedId);
+    editingSuspendedId = null;
+  }
+  orders.unshift(o);
+  saveData(); 
+  return true;
+}
+
+function saveOrderAction() {
+  if(performSave()) { clearOrder(); }
+}
+
+function saveAndPrintAction() {
+  if(performSave()) {
+      renderReceipt();
+      setTimeout(() => {
+          window.print();
+          clearOrder(); 
+      }, 300);
+  }
+}
+
+function suspendOrder() {
+  if(!document.getElementById("customer").value.trim() && !document.getElementById("phone").value.trim() && currentItems.length === 0) { alert("لا يوجد بيانات!"); return; }
+  incrementId();
+  let o = collectData();
+  if(editingSuspendedId) suspendedOrders = suspendedOrders.filter(x => x.id !== editingSuspendedId);
+  suspendedOrders.unshift(o);
+  saveData(); 
+  alert("تم تعليق الأوردر!");
+  clearOrder(); 
+}
+
+function getFilteredList(rawList) {
+  if(currentUser.role === 'manager') return rawList;
+  return rawList.filter(x => x.cashierCode === currentUser.code);
+}
+
+function renderSuspended() {
+  let list = getFilteredList(suspendedOrders);
+  let b = document.getElementById("suspendedBody");
+  if(list.length === 0) { b.innerHTML = `<tr><td colspan="5">لا توجد أوردرات معلقة.</td></tr>`; return; }
+  b.innerHTML = list.map((o) => {
+    let rawIndex = suspendedOrders.findIndex(x => x.id === o.id && x.cashierCode === o.cashierCode);
+    return `<tr>
+      <td>${esc(o.date)}</td>
+      <td><b>${esc(o.customer)}</b></td>
+      <td><b>${esc(o.windowNum)}</b></td>
+      <td>${o.items.length}</td>
+      <td>
+        <button class="primary" onclick="resumeSuspended(${rawIndex})">استكمال</button>
+        <button class="danger" onclick="deleteSuspended(${rawIndex})">حذف</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function resumeSuspended(index) {
+  let list = getFilteredList(suspendedOrders);
+  let o = list[index];
+  editingSuspendedId = o.id;
+  document.getElementById("orderId").value = o.id;
+  document.getElementById("windowNum").value = o.windowNum || 1;
+  ["customer", "phone", "area", "address", "notes"].forEach(k => {
+      let el = document.getElementById(k);
+      if(el) el.value = o[k] || "";
+  });
+  currentItems = o.items ? JSON.parse(JSON.stringify(o.items)) : [];
+  switchTab('tab-new'); renderItems(); renderReceipt();
+}
+
+function deleteSuspended(index) {
+  if(confirm("حذف الأوردر المعلق؟")) {
+    let list = getFilteredList(suspendedOrders);
+    let o = list[index];
+    let realIndex = suspendedOrders.findIndex(x => x.id === o.id && x.cashierCode === o.cashierCode);
+    if(realIndex > -1) { suspendedOrders.splice(realIndex, 1); saveData(); renderSuspended(); }
+  }
+}
+
+function renderHistory() {
+  let q = (document.getElementById("historySearch").value || "").trim().toLowerCase();
+  let list = getFilteredList(orders).filter(o => {
+      let str = [String(o.id), String(o.windowNum), String(o.customer), String(o.phone), String(o.cashierName)].join(" ").toLowerCase();
+      return !q || str.includes(q);
+  });
+  let b = document.getElementById("historyBody");
+  if(list.length === 0) { b.innerHTML = `<tr><td colspan="8">لا توجد نتائج.</td></tr>`; return; }
+  b.innerHTML = list.slice(0, 50).map(o => {
+    return `<tr>
+      <td><b>${esc(o.id)}</b></td>
+      <td>${esc(o.date)}</td>
+      <td><b>${esc(o.windowNum)}</b></td>
+      <td><b>${esc(o.customer)}</b></td>
+      <td>${esc(o.phone)}</td>
+      <td>${o.items.reduce((a, x) => a + x.qty, 0)}</td>
+      <td><b>${esc(o.cashierName)}</b></td>
+      <td><button class="primary" onclick="loadOrderToPrint('${o.id}', '${o.cashierCode}')">طباعة</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function loadOrderToPrint(id, cashierCode) {
+  let o = orders.find(x => x.id == id && x.cashierCode == cashierCode);
+  if(!o) return;
+  document.getElementById("orderId").value = o.id;
+  document.getElementById("windowNum").value = o.windowNum || 1;
+  ["customer", "phone", "area", "address", "notes"].forEach(k => {
+      let el = document.getElementById(k);
+      if(el) el.value = o[k] || "";
+  });
+  currentItems = o.items ? JSON.parse(JSON.stringify(o.items)) : [];
+  switchTab('tab-new'); renderItems(); renderReceipt();
+}
+
+function renderCancelList() {
+  let q = (document.getElementById("cancelSearch").value || "").trim().toLowerCase();
+  let list = getFilteredList(orders).filter(o => {
+      let str = [String(o.id), String(o.customer), String(o.cashierName)].join(" ").toLowerCase();
+      return !q || str.includes(q);
+  });
+  let b = document.getElementById("cancelBody");
+  if(list.length === 0) { b.innerHTML = `<tr><td colspan="6">لا توجد أوردرات.</td></tr>`; return; }
+  b.innerHTML = list.slice(0, 50).map(o => `
+    <tr>
+      <td><b>${esc(o.id)}</b></td>
+      <td>${esc(o.date)}</td>
+      <td>${esc(o.windowNum)}</td>
+      <td>${esc(o.customer)}</td>
+      <td>${esc(o.phone)}</td>
+      <td><button class="danger" onclick="deleteOrderForever('${o.id}', '${o.cashierCode}')">حذف ❌</button></td>
+    </tr>
+  `).join("");
+}
+
+function deleteOrderForever(id, cashierCode) {
+  if(confirm("حذف نهائي؟")) {
+    orders = orders.filter(x => !(x.id == id && x.cashierCode == cashierCode)); 
+    saveData(); renderCancelList();
+  }
+}
+
+let filteredOrdersForReport = [];
+function getOrderISODate(o) {
+  if (o.isoDate) return o.isoDate.split("T")[0];
+  try {
+    let p = o.date.split(" ")[0].split("/");
+    if (p.length === 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+  } catch(e) {}
+  return "";
+}
+
+function filterReports() {
+  let dFrom = document.getElementById("dateFrom").value;
+  let dTo = document.getElementById("dateTo").value;
+  let baseList = getFilteredList(orders);
+  filteredOrdersForReport = baseList.filter(o => {
+    let oDate = getOrderISODate(o);
+    if (!oDate) return true;
+    if (dFrom && oDate < dFrom) return false;
+    if (dTo && oDate > dTo) return false;
+    return true;
+  });
+  updateStatsUI();
+}
+
+function updateStatsUI() {
+  let tQ = 0;
+  filteredOrdersForReport.forEach(o => o.items.forEach(i => { tQ += i.qty; }));
+  document.getElementById("sOrders").textContent = filteredOrdersForReport.length;
+  document.getElementById("sQty").textContent = tQ;
+}
+
+function updateStats() {
+  if (!document.getElementById("dateFrom").value) {
+     let today = new Date().toISOString().split("T")[0];
+     document.getElementById("dateFrom").value = today; document.getElementById("dateTo").value = today;
+  }
+  filterReports();
+}
+
+function exportToExcel() {
+  if(filteredOrdersForReport.length === 0) { alert("لا توجد بيانات للتصدير."); return; }
+  let csvContent = "\uFEFFرقم الأوردر,التاريخ,الشباك,العميل,الموبايل,المنطقة,العنوان,الكمية الكلية,الكاشير\n";
+  filteredOrdersForReport.forEach(o => {
+    let tQ = o.items.reduce((a, x) => a + x.qty, 0);
+    csvContent += `"${o.id}","${o.date}","${o.windowNum}","${o.customer}","${o.phone}","${o.area}","${o.address}",${tQ},"${o.cashierName}"\n`;
+  });
+  let link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
+  link.download = "Flamingo_Orders_Reports_" + new Date().toISOString().split('T')[0] + ".csv";
+  link.click();
+}
+
+["customer", "phone", "area", "address", "notes"].forEach(x => {
+  let el = document.getElementById(x);
+  if(el) el.addEventListener("input", renderReceipt);
+});
+
+["freshWindow", "freshCustomer", "freshSection"].forEach(x => {
+  let el = document.getElementById(x);
+  if(el) el.addEventListener("input", renderFreshReceipt);
+});
+</script>
+</body>
+</html>
